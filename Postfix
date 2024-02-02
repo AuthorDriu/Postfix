@@ -1,0 +1,90 @@
+#!/usr/bin/python3
+
+import sys
+import termcolor
+
+
+if len(sys.argv) < 2 or sys.argv[1] in ["-h", "--help"]:
+    print("Использование:")
+    print("    Postfix <expr>")
+    print()
+    print("Postfix принимает математическое выражаение")
+    print("в постфиксной нотации и вычисляет его значение")
+    print()
+    print("Операторы:")
+    print("    +    сложение")
+    print("    -    вычитание")
+    print("    x    умножение")
+    print("    /    деление")
+    print("    ^    возведение в степень")
+    print()
+    print("Что значит постфиксная нотация? Всё просто:")
+    print("    Постфиксная нотация означает, что операторы,")
+    print("    такие как сложение, вычитание, умножение и т.д.")
+    print("    указваются после операндов, над которыми этот")
+    print("    оператор будет производить операции.")
+    print()
+    print("Например:")
+    print(f"    {termcolor.colored('(9 - 5) + 2', 'green')} -> {termcolor.colored('9 5 - 2 +', 'yellow')}")
+    print(f"    {termcolor.colored('9 - (5 + 2)', 'green')} -> {termcolor.colored('9 5 2 + -', 'yellow')}")
+    print()
+    print("То есть команды будут выглядеть так:")
+    print("    Postfix", termcolor.colored("9 5 - 2 +", "yellow"))
+    print("    Postfix", termcolor.colored("9 5 2 + -", "yellow"))
+    print()
+    print(termcolor.colored("ВАЖНО: Разделяйте операторы и операнды", "yellow"))
+    print(termcolor.colored("       друг от друга пробелами!", "yellow"))
+    sys.exit(0)
+
+
+expr = sys.argv[1::]
+
+
+def is_digit(value: str):
+    if isinstance(value, int) or isinstance(value, float):
+        return True
+    
+    if "." in value:
+        value = value.split(".")
+        return value[0].isdigit() and value[1].isdigit() \
+            if value[0] != "" else value[1].isdigit()
+    else: return value.isdigit()
+
+
+operators = {
+    "+": lambda x, y: x + y,
+    "-": lambda x, y: x - y,
+    "x": lambda x, y: x * y,
+    "/": lambda x, y: x / y,
+    "^": lambda x, y: x ** y,
+}
+
+i = 0
+
+while i < len(expr):
+    if expr[i] in operators:
+        if i < 2:
+            print(termcolor.colored(f"Не указаны операнды для оператора `{expr[i]}`", "red"))
+            sys.exit(-1)
+        
+        x = float(expr[i - 2])
+        y = float(expr[i - 1])
+        f = operators[expr[i]]
+        
+        r = f(x, y)
+        
+        expr.pop(i - 2)
+        expr.pop(i - 2)
+        expr.pop(i - 2)
+        i -= 2
+        
+        expr.insert(i, r)
+    
+    elif not is_digit(expr[i]):
+        print(termcolor.colored(f"Неизвестный символ `{expr[i]}`", "red"))
+        sys.exit(-3)
+    
+    i += 1
+
+print("Результат:", termcolor.colored(f"{expr[0]}", "yellow"))
+
